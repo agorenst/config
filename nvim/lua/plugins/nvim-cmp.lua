@@ -17,9 +17,9 @@ return {
 				end,
 			},
 			mapping = {
-				["<Tab>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
-				["<S-Tab>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
-				["<CR>"] = cmp.mapping.confirm({ select = true }),
+				["<tab>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
+				["<s-tab>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
+				["<cr>"] = cmp.mapping.confirm({ select = true }),
 			},
 			sources = cmp.config.sources({
 				{ name = "nvim_lsp" }, -- LSP-based completion

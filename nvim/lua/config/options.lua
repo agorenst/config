@@ -50,4 +50,4 @@ vim.cmd("syntax spell toplevel")
 -- l N   Line number.
 -- c N   Column number (byte index).
 -- m F   Modified flag, text is "[+]"; "[-]" if 'modifiable' is off.
-vim.o.statusline = "%f %y %m (%l:%c)"
+vim.o.statusline = "%f %y %m (%l:%c) %= %{FugitiveStatusline()}"

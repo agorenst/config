@@ -3,7 +3,7 @@ local config = function()
 	local lspconfig = require("lspconfig")
 
 	local capabilities = cmp_nvim_lsp.default_capabilities()
-  capabilities.offset_encoding = { "utf-8" }
+	capabilities.offset_encoding = { "utf-8" }
 
 	local on_attach = function(_, buffer)
 		-- Enable LSP-based keybindings here
@@ -11,19 +11,12 @@ local config = function()
 
 		-- Go to Definition
 		vim.keymap.set("n", "gd", vim.lsp.buf.definition, bufopts)
-
 		-- Go to Declaration
 		vim.keymap.set("n", "gD", vim.lsp.buf.declaration, bufopts)
-
 		-- Find References
 		vim.keymap.set("n", "gr", vim.lsp.buf.references, bufopts)
-
-		-- Hover for documentation
-		-- vim.keymap.set("n", "K", vim.lsp.buf.hover, bufopts)
-
 		-- Rename symbol
 		vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, bufopts)
-
 		-- Format document
 		vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, bufopts)
 	end
