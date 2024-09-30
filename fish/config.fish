@@ -12,6 +12,7 @@ end
 #   cp $argv[1] $WINDESKTOP
 # end
 
+# Handy function
 function add_to_path
   set -l path_element $argv[1]
   if not contains -- $path_element $PATH
@@ -21,6 +22,8 @@ end
 
 # Needed for efm-langserver for my neovim setup
 add_to_path "/home/aaron/go/bin"
+# fnm, used to install node, used for some nvim plugins :/ (mainly tree-sitter...)
+add_to_path "/home/aaron/.local/share/fnm"
 
 function resrc
   source ~/.config/fish/config.fish
@@ -48,6 +51,11 @@ function efc
   resrc
 end
 
+# Go to my config directory
+function gtc
+  pushd ~/config
+end
+
 function etx
   nvim_in_dir ~/.config/tmux
   if test $status = 0
@@ -57,7 +65,6 @@ function etx
     echo "Failed to edit tmux config."
   end
 end
-
 
 
 #################################################################################
