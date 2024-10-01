@@ -6,6 +6,12 @@ local config = function()
 	capabilities.offset_encoding = { "utf-8" }
 
 	local on_attach = function(_, buffer)
+		require("lsp_signature").on_attach({
+			hint_prefix = "",
+			handler_opts = {
+				border = "none",
+			},
+		}, buffer)
 		-- Enable LSP-based keybindings here
 		local bufopts = { noremap = true, silent = true, buffer = buffer }
 

@@ -23,7 +23,8 @@ return {
 			},
 			sources = cmp.config.sources({
 				{ name = "nvim_lsp" }, -- LSP-based completion
-				-- { name = "buffer" }, -- Buffer-based completion
+        { name = "luasnip" },
+				{ name = "buffer" }, -- Buffer-based completion
 				{ name = "path" }, -- Path-based completion
 				{ name = "vimtex" }, -- https://github.com/micangl/cmp-vimtex
 			}),
