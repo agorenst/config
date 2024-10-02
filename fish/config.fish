@@ -25,6 +25,9 @@ add_to_path "/home/aaron/go/bin"
 # fnm, used to install node, used for some nvim plugins :/ (mainly tree-sitter...)
 add_to_path "/home/aaron/.local/share/fnm"
 
+# Add fnm environment to source.
+fnm env | source
+
 function resrc
   source ~/.config/fish/config.fish
 end
