@@ -18,43 +18,48 @@ local new_maker = function(filepath, bufnr, opts)
           vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "BINARY" })
         end)
       end
-    end
+    end,
   }):sync()
 end
 
-require("telescope").setup {
+require("telescope").setup({
   defaults = {
     buffer_previewer_maker = new_maker,
-  }
-}
+  },
+})
 return {
-	"nvim-telescope/telescope.nvim",
-	dependencies = { "nvim-lua/plenary.nvim" },
-	lazy = false,
-	keys = {
-		vim.keymap.set("n", "<leader>ff", ":Telescope find_files<CR>", { desc = "Telescope find files" }),
-		vim.keymap.set("n", "<leader>fg", ":Telescope live_grep<CR>", { desc = "Telescope live grep" }),
-		vim.keymap.set("n", "<leader>fb", ":Telescope buffers<CR>", { desc = "Telescope buffers" }),
-		vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Telescope help tags" }),
-		vim.keymap.set("n", "<leader>fk", ":Telescope keymaps<CR>", { desc = "Telescope keymaps" }),
-		vim.keymap.set("n", "<leader>f/", ":Telescope current_buffer_fuzzy_find<CR>", { desc = "Telescope search" }),
-	},
-	config = function()
-		require("telescope").setup({
-			defaults = {
+  "nvim-telescope/telescope.nvim",
+  dependencies = { "nvim-lua/plenary.nvim" },
+  lazy = false,
+  keys = {
+    vim.keymap.set("n", "<leader>ff", require("telescope.builtin").find_files, { desc = "Telescope find files" }),
+    vim.keymap.set("n", "<leader>fg", require("telescope.builtin").live_grep, { desc = "Telescope live grep" }),
+    vim.keymap.set("n", "<leader>fb", require("telescope.builtin").buffers, { desc = "Telescope buffers" }),
+    vim.keymap.set("n", "<leader>fh", require("telescope.builtin").help_tags, { desc = "Telescope help tags" }),
+    vim.keymap.set("n", "<leader>fk", require("telescope.builtin").keymaps, { desc = "Telescope keymaps" }),
+    vim.keymap.set(
+      "n",
+      "<leader>f/",
+      require("telescope.builtin").current_buffer_fuzzy_find,
+      { desc = "Telescope search" }
+    ),
+  },
+  config = function()
+    require("telescope").setup({
+      defaults = {
         buffer_previewer_maker = new_maker,
-				file_sorter = require("telescope.sorters").get_fuzzy_file, -- allow for fuzzy matching
-				mappings = {
-					i = {
-						["<C-j>"] = actions.move_selection_next,
-						["<C-k>"] = actions.move_selection_previous,
-					},
-					n = {
-						["<C-j>"] = actions.move_selection_next,
-						["<C-k>"] = actions.move_selection_previous,
-					},
-				},
-			},
-		})
-	end,
+        file_sorter = require("telescope.sorters").get_fuzzy_file, -- allow for fuzzy matching
+        mappings = {
+          i = {
+            ["<C-j>"] = actions.move_selection_next,
+            ["<C-k>"] = actions.move_selection_previous,
+          },
+          n = {
+            ["<C-j>"] = actions.move_selection_next,
+            ["<C-k>"] = actions.move_selection_previous,
+          },
+        },
+      },
+    })
+  end,
 }

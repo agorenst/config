@@ -11,19 +11,20 @@ opt.wrap = false
 
 -- Search
 opt.incsearch = true
-opt.ignorecase = true
+opt.ignorecase = true -- this is also for autocomplete of commands
 opt.smartcase = true
 
 -- Appearance
 opt.number = true
-opt.colorcolumn = "96"
+-- opt.colorcolumn = "96" Don't really like this TBH.
 opt.signcolumn = "yes"
 opt.cmdheight = 1
-opt.scrolloff = 10
+opt.scrolloff = 6
 opt.completeopt = "menuone,noinsert,noselect" -- TODO revisit this
 opt.wrap = true
 opt.linebreak = true
 opt.breakindent = true
+opt.termguicolors = true
 
 -- Behavior
 opt.hidden = true -- TODO revisit this
@@ -35,12 +36,15 @@ opt.backup = false
 opt.backspace = "indent,eol,start"
 opt.splitright = true
 opt.splitbelow = true
--- Saves time to load this after globals
-opt.clipboard:append("unnamedplus")
+opt.clipboard = "unnamedplus"
 opt.modifiable = true
+
+-- Spelling
 opt.spell = true
 opt.spelllang = { "en_us" }
 vim.cmd("syntax spell toplevel")
+
+opt.virtualedit = "block"
 
 -- opt.autochdir = true -- this doesn't play well with telescope...
 -- opt.shada = "'100" -- Ensure shada stores last cursor positions -- this isn't working?

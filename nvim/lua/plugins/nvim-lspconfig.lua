@@ -6,12 +6,6 @@ local config = function()
 	capabilities.offset_encoding = { "utf-8" }
 
 	local on_attach = function(_, buffer)
-		require("lsp_signature").on_attach({
-			hint_prefix = "",
-			handler_opts = {
-				border = "none",
-			},
-		}, buffer)
 		-- Enable LSP-based keybindings here
 		local bufopts = { noremap = true, silent = true, buffer = buffer }
 
@@ -21,6 +15,8 @@ local config = function()
 		vim.keymap.set("n", "gD", vim.lsp.buf.declaration, bufopts)
 		-- Find References
 		vim.keymap.set("n", "gr", vim.lsp.buf.references, bufopts)
+		-- hrrrrm
+		vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, bufopts)
 		-- Rename symbol
 		vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, bufopts)
 		-- Format document
