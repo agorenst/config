@@ -55,3 +55,6 @@ opt.virtualedit = "block"
 -- c N   Column number (byte index).
 -- m F   Modified flag, text is "[+]"; "[-]" if 'modifiable' is off.
 vim.o.statusline = "%f %y %m (%l:%c) %= %{FugitiveStatusline()}"
+-- Recommended via checkhealth?
+vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+

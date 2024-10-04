@@ -15,34 +15,25 @@ local new_maker = function(filepath, bufnr, opts)
       else
         -- maybe we want to write something to the buffer here
         vim.schedule(function()
-          vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "BINARY" })
+          vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "===BINARY===" })
         end)
       end
     end,
   }):sync()
 end
 
-require("telescope").setup({
-  defaults = {
-    buffer_previewer_maker = new_maker,
-  },
-})
+local builtin = require("telescope.builtin")
 return {
   "nvim-telescope/telescope.nvim",
   dependencies = { "nvim-lua/plenary.nvim" },
   lazy = false,
   keys = {
-    vim.keymap.set("n", "<leader>ff", require("telescope.builtin").find_files, { desc = "Telescope find files" }),
-    vim.keymap.set("n", "<leader>fg", require("telescope.builtin").live_grep, { desc = "Telescope live grep" }),
-    vim.keymap.set("n", "<leader>fb", require("telescope.builtin").buffers, { desc = "Telescope buffers" }),
-    vim.keymap.set("n", "<leader>fh", require("telescope.builtin").help_tags, { desc = "Telescope help tags" }),
-    vim.keymap.set("n", "<leader>fk", require("telescope.builtin").keymaps, { desc = "Telescope keymaps" }),
-    vim.keymap.set(
-      "n",
-      "<leader>f/",
-      require("telescope.builtin").current_buffer_fuzzy_find,
-      { desc = "Telescope search" }
-    ),
+    vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files" }),
+    vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Telescope live grep" }),
+    vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers" }),
+    vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" }),
+    vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Telescope keymaps" }),
+    vim.keymap.set("n", "<leader>f/", builtin.current_buffer_fuzzy_find, { desc = "Telescope search" }),
   },
   config = function()
     require("telescope").setup({
