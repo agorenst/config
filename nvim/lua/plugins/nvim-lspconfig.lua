@@ -65,5 +65,16 @@ return {
       capabilities = capabilities,
       on_attach = on_attach,
     })
+
+    lspconfig.rust_analyzer.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+    })
+
+    -- Can't install LSP these days.
+    -- lspconfig.fish_lsp.setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    -- })
   end,
 }
