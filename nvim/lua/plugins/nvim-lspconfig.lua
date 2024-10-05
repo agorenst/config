@@ -71,6 +71,8 @@ return {
       on_attach = on_attach,
     })
 
+    lspconfig.marksman.setup({})
+
     -- Can't install LSP these days.
     -- lspconfig.fish_lsp.setup({
     --   capabilities = capabilities,
