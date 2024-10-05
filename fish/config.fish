@@ -8,6 +8,11 @@ if not set -q TMUX
 end
 
 
+bind \cj 'commandline -f history-search-forward'
+bind \ck 'commandline -f history-search-backward'
+bind \ch 'commandline -f backward-char'
+bind \cl 'commandline -f forward-char'
+
 # function to_windows
 #   cp $argv[1] $WINDESKTOP
 # end
@@ -54,8 +59,8 @@ function efc
   resrc
 end
 
-# Go to my config directory
-function gtc
+# Move To Config
+function mtc
   pushd ~/config
 end
 
