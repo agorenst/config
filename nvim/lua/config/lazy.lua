@@ -26,7 +26,7 @@ require("lazy").setup({
     { import = "plugins.small" },
     -- Programming language support
     { import = "plugins.languages" },
-    -- The big ones!
+    -- The big one!
     { import = "plugins.telescope" },
   },
   -- Configure any other settings here. See the documentation for more details.

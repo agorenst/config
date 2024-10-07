@@ -38,7 +38,7 @@ return {
   config = function()
     require("telescope").setup({
       defaults = {
-        buffer_previewer_maker = new_maker,
+        buffer_previewer_maker = new_maker,                        -- help override crashes when reading binary.
         file_sorter = require("telescope.sorters").get_fuzzy_file, -- allow for fuzzy matching
         mappings = {
           i = {

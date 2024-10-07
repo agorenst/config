@@ -150,13 +150,23 @@ return {
         on_attach = on_attach,
       })
 
-      lspconfig.marksman.setup({})
+      lspconfig.marksman.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+      })
 
-      -- Can't install LSP these days.
+      -- Can't install LSP with node gunk.
       -- lspconfig.fish_lsp.setup({
       --   capabilities = capabilities,
       --   on_attach = on_attach,
       -- })
     end,
-  }
+  },
+  {
+    "williamboman/mason.nvim",
+    config = function()
+      require('mason').setup({})
+    end,
+    lazy = false
+  },
 }

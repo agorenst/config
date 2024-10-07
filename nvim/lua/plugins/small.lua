@@ -1,13 +1,5 @@
 return {
   {
-    "williamboman/mason.nvim",
-    config = function()
-      require('mason').setup {
-      }
-    end,
-    lazy = false
-  },
-  {
     "micangl/cmp-vimtex",
     lazy = false,
   },
@@ -16,7 +8,7 @@ return {
     config = function()
       vim.g.vimtex_compiler_latexmk = {
         options = {
-          "-shell-escape",   -- for minted
+          "-shell-escape", -- for minted
           "-verbose",
           "-file-line-error",
           "-synctex=1",
