@@ -12,7 +12,7 @@ return {
           "rust", "toml",
           -- scripting etc.
           "bash",
-          -- "fish", -- not able to install the LSP for now...
+          "fish", -- not able to install the LSP for now...
           "make",
           "dot",
           "lua",
@@ -63,8 +63,8 @@ return {
           end,
         },
         mapping = {
-          ["<tab>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
-          ["<s-tab>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
+          ["<c-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
+          ["<c-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
           ["<cr>"] = cmp.mapping.confirm({ select = true }),
         },
         sources = cmp.config.sources({
@@ -92,14 +92,26 @@ return {
 
       local lsp_fmt_group = vim.api.nvim_create_augroup("LspFormattingGroup", {})
       local on_attach = function(client, buffer)
-        -- Enable LSP-based keybindings here
-        local bufopts = { noremap = true, silent = true, buffer = buffer }
+        -- Per https://neovim.io/doc/user/lsp.html#_quickstart we have the default mappings:
+        -- "grn" is mapped in Normal mode to vim.lsp.buf.rename()
+        -- "gra" is mapped in Normal and Visual mode to vim.lsp.buf.code_action()
+        -- "grr" is mapped in Normal mode to vim.lsp.buf.references()
+        -- CTRL-S is mapped in Insert mode to vim.lsp.buf.signature_help()
 
-        vim.keymap.set("n", "gd", vim.lsp.buf.definition, bufopts)
-        vim.keymap.set("n", "gD", vim.lsp.buf.declaration, bufopts)
-        vim.keymap.set("n", "gr", vim.lsp.buf.references, bufopts)
-        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, bufopts)
-        vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, bufopts)
+        -- vim.keymap.set("n", "gd", vim.lsp.buf.definition)
+        -- vim.keymap.set("n", "gD", vim.lsp.buf.declaration)
+        -- vim.keymap.set("n", "gr", vim.lsp.buf.references)
+        -- vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
+        -- vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
+
+        vim.keymap.set('n', 'grn', vim.lsp.buf.rename)
+        vim.keymap.set('n', 'gra', vim.lsp.buf.code_action)
+        vim.keymap.set('n', 'grr', vim.lsp.buf.references)
+        vim.keymap.set('n', 'gri', vim.lsp.buf.incoming_calls)
+
+        vim.keymap.set('n', 'grd', vim.lsp.buf.definition)
+        vim.keymap.set('n', 'grD', vim.lsp.buf.declaration)
+        vim.keymap.set('n', 'grs', vim.lsp.buf.signature_help)
 
         -- Formatting on save
         if client.server_capabilities.documentFormattingProvider then
