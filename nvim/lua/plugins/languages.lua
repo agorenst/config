@@ -63,16 +63,16 @@ return {
           end,
         },
         mapping = {
-          ["<c-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
-          ["<c-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
-          ["<cr>"] = cmp.mapping.confirm({ select = true }),
+          ["<c-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert, }),
+          ["<c-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert, }),
+          ["<cr>"] = cmp.mapping.confirm({ select = true, }),
         },
         sources = cmp.config.sources({
-          { name = "nvim_lsp" }, -- LSP-based completion
-          { name = "luasnip" },
+          { name = "nvim_lsp", }, -- LSP-based completion
+          { name = "luasnip", },
           -- { name = "buffer" }, -- Buffer-based completion
-          { name = "path" },   -- Path-based completion
-          { name = "vimtex" }, -- https://github.com/micangl/cmp-vimtex
+          { name = "path", },   -- Path-based completion
+          { name = "vimtex", }, -- https://github.com/micangl/cmp-vimtex
         }),
       })
     end,
@@ -88,7 +88,7 @@ return {
       local lspconfig = require("lspconfig")
 
       local capabilities = cmp_nvim_lsp.default_capabilities()
-      capabilities.offset_encoding = { "utf-8" }
+      capabilities.offset_encoding = { "utf-8", }
 
       local lsp_fmt_group = vim.api.nvim_create_augroup("LspFormattingGroup", {})
       local on_attach = function(client, buffer)
@@ -104,23 +104,23 @@ return {
         -- vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
         -- vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
 
-        vim.keymap.set('n', 'grn', vim.lsp.buf.rename)
-        vim.keymap.set('n', 'gra', vim.lsp.buf.code_action)
-        vim.keymap.set('n', 'grr', vim.lsp.buf.references)
-        vim.keymap.set('n', 'gri', vim.lsp.buf.incoming_calls)
+        vim.keymap.set("n", "grn", vim.lsp.buf.rename)
+        vim.keymap.set("n", "gra", vim.lsp.buf.code_action)
+        vim.keymap.set("n", "grr", vim.lsp.buf.references)
+        vim.keymap.set("n", "gri", vim.lsp.buf.incoming_calls)
 
-        vim.keymap.set('n', 'grd', vim.lsp.buf.definition)
-        vim.keymap.set('n', 'grD', vim.lsp.buf.declaration)
-        vim.keymap.set('n', 'grs', vim.lsp.buf.signature_help)
+        vim.keymap.set("n", "grd", vim.lsp.buf.definition)
+        vim.keymap.set("n", "grD", vim.lsp.buf.declaration)
+        vim.keymap.set("n", "grs", vim.lsp.buf.signature_help)
 
         -- Formatting on save
         if client.server_capabilities.documentFormattingProvider then
-          vim.api.nvim_clear_autocmds({ group = lsp_fmt_group, buffer = buffer })
+          vim.api.nvim_clear_autocmds({ group = lsp_fmt_group, buffer = buffer, })
           vim.api.nvim_create_autocmd("BufWritePre", {
             group = lsp_fmt_group,
             buffer = buffer,
             callback = function()
-              vim.lsp.buf.format({ async = false })
+              vim.lsp.buf.format({ async = false, })
             end,
           })
         end
@@ -133,7 +133,14 @@ return {
         settings = {
           Lua = {
             diagnostics = {
-              globals = { "vim" },
+              globals = { "vim", },
+            },
+            format = {
+              -- This is basically what we'd apply.
+              defaultConfig = {
+                quote_style = "double",
+                trailing_table_separator = "always",
+              },
             },
             workspace = {
               library = {
@@ -177,8 +184,8 @@ return {
   {
     "williamboman/mason.nvim",
     config = function()
-      require('mason').setup({})
+      require("mason").setup({})
     end,
-    lazy = false
+    lazy = false,
   },
 }
