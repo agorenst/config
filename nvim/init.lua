@@ -2,12 +2,12 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath, })
   if vim.v.shell_error ~= 0 then
     vim.api.nvim_echo({
-      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out,                            "WarningMsg" },
-      { "\nPress any key to exit..." },
+      { "Failed to clone lazy.nvim:\n", "ErrorMsg", },
+      { out,                            "WarningMsg", },
+      { "\nPress any key to exit...", },
     }, true, {})
     vim.fn.getchar()
     os.exit(1)
@@ -82,7 +82,7 @@ opt.modifiable = true
 
 -- Spelling
 opt.spell = true
-opt.spelllang = { "en_us" }
+opt.spelllang = { "en_us", }
 vim.cmd("syntax spell toplevel")
 
 opt.virtualedit = "block"
@@ -95,7 +95,7 @@ opt.virtualedit = "block"
 -- l N   Line number.
 -- c N   Column number (byte index).
 -- m F   Modified flag, text is "[+]"; "[-]" if 'modifiable' is off.
-vim.o.statusline = "%f %y %m (%l:%c) %= %{FugitiveStatusline()}"
+-- vim.o.statusline = "%f %y %m (%l:%c) %= %{FugitiveStatusline()}"
 -- Recommended via checkhealth?
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 
@@ -107,13 +107,14 @@ vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 local keymap = vim.keymap
-keymap.set("i", "jk", "<esc>", { noremap = true })
-keymap.set("n", ";", ":", { noremap = true })
-keymap.set("i", "<c-v>", "<esc>pi", { noremap = true })
+keymap.set("i", "jk", "<esc>", { noremap = true, })
+keymap.set("n", ";", ":", { noremap = true, })
+keymap.set("i", "<c-v>", "<esc>pi", { noremap = true, })
 
 -- https://www.reddit.com/r/neovim/comments/okbag3/how_can_i_remap_ctrl_backspace_to_delete_a_word/ which cites:
 -- https://unix.stackexchange.com/questions/203418/bind-c-i-and-tab-keys-to-different-commands-in-terminal-applications-via-inputr/203521#203521
-keymap.set("i", "<c-h>", "<c-w>", { noremap = true })
+-- This let's me do ctrl-backspace to do delete-word.
+keymap.set("i", "<c-h>", "<c-w>", { noremap = true, })
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -123,31 +124,32 @@ keymap.set("i", "<c-h>", "<c-w>", { noremap = true })
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Run these functions on entering and leaving Neovim
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    local cwd = vim.fn.getcwd()
-    local session_file = cwd:gsub("[/\\]", "_") .. ".vim" -- Convert the path to a file-safe format
-    local session_path = vim.fn.stdpath("data") .. "/sessions/" .. session_file
-
-    if vim.fn.filereadable(session_path) == 1 then
-      vim.cmd("silent! source " .. session_path) -- Load the session if it exists
-    end
-  end
-})
-
-vim.api.nvim_create_autocmd("VimLeavePre", {
-  callback = function()
-    local cwd = vim.fn.getcwd()
-    local session_file = cwd:gsub("[/\\]", "_") .. ".vim" -- Convert the path to a file-safe format
-    local session_path = vim.fn.stdpath("data") .. "/sessions/" .. session_file
-
-    -- Ensure the session directory exists
-    vim.fn.mkdir(vim.fn.stdpath("data") .. "/sessions", "p")
-
-    -- Save the current session to the specified path
-    vim.cmd("mksession! " .. session_path)
-  end
-})
+-- Turning these off: they had trouble with opening new buffers, etc.
+-- vim.api.nvim_create_autocmd("VimEnter", {
+--   callback = function()
+--     local cwd = vim.fn.getcwd()
+--     local session_file = cwd:gsub("[/\\]", "_") .. ".vim" -- Convert the path to a file-safe format
+--     local session_path = vim.fn.stdpath("data") .. "/sessions/" .. session_file
+--
+--     if vim.fn.filereadable(session_path) == 1 then
+--       vim.cmd("silent! source " .. session_path) -- Load the session if it exists
+--     end
+--   end,
+-- })
+--
+-- vim.api.nvim_create_autocmd("VimLeavePre", {
+--   callback = function()
+--     local cwd = vim.fn.getcwd()
+--     local session_file = cwd:gsub("[/\\]", "_") .. ".vim" -- Convert the path to a file-safe format
+--     local session_path = vim.fn.stdpath("data") .. "/sessions/" .. session_file
+--
+--     -- Ensure the session directory exists
+--     vim.fn.mkdir(vim.fn.stdpath("data") .. "/sessions", "p")
+--
+--     -- Save the current session to the specified path
+--     vim.cmd("mksession! " .. session_path)
+--   end,
+-- })
 
 
 --------------------------------------------------------------------------------
@@ -204,13 +206,31 @@ require("lazy").setup({
       "tpope/vim-fugitive",
       lazy = false,
     },
+    {
+      "nvim-lualine/lualine.nvim",
+      dependencies = { "nvim-tree/nvim-web-devicons", },
+      lazy = false,
+      config = function()
+        require("lualine").setup()
+      end,
+    },
+    {
+      "rmagatti/auto-session",
+      lazy = false,
+      ---@module "auto-session"
+      ---@type AutoSession.Config
+      opts = {
+        suppressed_dirs = { "~/", "~/Downloads", "/", },
+        -- log_level = 'debug',
+      },
+    },
     -- Programming language support
-    { import = "plugins.languages" },
+    { import = "plugins.languages", },
     -- The big one!
-    { import = "plugins.telescope" },
+    { import = "plugins.telescope", },
   },
   -- Configure any other settings here. See the documentation for more details.
   -- colorscheme that will be used when installing plugins.
-  install = { colorscheme = { "tokyonight" } },
-  checker = { enabled = false }, -- don't check for updates.
+  install = { colorscheme = { "tokyonight", }, },
+  checker = { enabled = false, }, -- don't check for updates.
 })

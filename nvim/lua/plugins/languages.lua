@@ -24,7 +24,7 @@ return {
           "beancount",
           "markdown",
         },
-        auto_install = true, -- install for any new file
+        -- auto_install = true, -- install for any new file
 
         -- Use the treesitter grammar to enable text objects.
         -- Requires "nvim-treesitter/nvim-treesitter-textobjects"
@@ -64,6 +64,7 @@ return {
         },
         mapping = {
           ["<c-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert, }),
+          ["<tab>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert, }),
           ["<c-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert, }),
           ["<cr>"] = cmp.mapping.confirm({ select = true, }),
         },
@@ -112,6 +113,7 @@ return {
         vim.keymap.set("n", "grd", vim.lsp.buf.definition)
         vim.keymap.set("n", "grD", vim.lsp.buf.declaration)
         vim.keymap.set("n", "grs", vim.lsp.buf.signature_help)
+        vim.keymap.set("n", "ged", vim.diagnostic.open_float)
 
         -- Formatting on save
         if client.server_capabilities.documentFormattingProvider then
