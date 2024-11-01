@@ -13,6 +13,15 @@ bind \ck 'commandline -f history-search-backward'
 bind \ch 'commandline -f backward-char'
 bind \cl 'commandline -f forward-char'
 
+# From https://gist.github.com/josh-padnick/c90183be3d0e1feb89afd7573505cab3
+function _initialize_ssh
+  if not pgrep --full ssh-agent | string collect > /dev/null
+    eval (ssh-agent -c)
+    set -Ux SSH_AGENT_PID $SSH_AGENT_PID
+    set -Ux SSH_AUTH_SOCK $SSH_AUTH_SOCK
+  end
+end
+
 # function to_windows
 #   cp $argv[1] $WINDESKTOP
 # end
