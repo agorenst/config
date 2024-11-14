@@ -53,46 +53,24 @@ bindkey '^h' backward-word
 bindkey '^l' forward-word
 
 
-# # Display the clock time on the left
-# PROMPT='%F{5}[%D{%H:%M:%S}]%f %F{116}%(?:%1{ %} :%1{X%} )%c%f $(git_prompt_info)'
-# #
-# # Initialize variables for timing
-# typeset -g _aaron_start_time _aaron_real_time
-# # Record the start time before each command
-# preexec() {
-#   _aaron_start_time=$EPOCHREALTIME
-# }
-# # Calculate and display the command execution time on the right
-# precmd() {
-#   RPROMPT=
-#   if [[ -n $_aaron_start_time ]]; then
-#     _aaron_real_time=$EPOCHREALTIME
-#     elapsed_time=$(printf "%.2f" "$(($_aaron_real_time - _aaron_start_time))")
-#     RPROMPT="%F{4}${elapsed_time}s%f"
-#     unset _aaron_start_time
-#   fi
-# }
-
 # Left-side prompt showing current time and directory
 PROMPT='%F{5}[%D{%H:%M:%S}]%f %F{116}%c%f $(git_prompt_info)'
 
-# Initialize variables for timing
-typeset -g _aaron_start_time _aaron_real_time
-
 # Track the start time of each command
+typeset -g _aaron_start_time
 preexec() {
   _aaron_start_time=$EPOCHREALTIME
 }
 
-# Calculate elapsed time and set RPROMPT with a success/failure indicator
+# On the RHS report the result of the previous command (timing, return status)
 precmd() {
-  # have to cache exit status even before resetting RPROMPT
+  # Have to cache exit status even before resetting RPROMPT
   local exit_status=$?
   RPROMPT=""
 
   if [[ -n $_aaron_start_time ]]; then
     _aaron_real_time=$EPOCHREALTIME
-    elapsed_time=$(printf "%.2f" "$(($_aaron_real_time - _aaron_start_time))")
+    elapsed_time=$(printf "%.2f" "$(($EPOCHREALTIME - _aaron_start_time))")
     
     # Show the time of the previous command
     RPROMPT="%F{4}${elapsed_time}s%f"
