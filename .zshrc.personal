@@ -52,49 +52,59 @@ bindkey '^j' down-line-or-history   # Ctrl-j to move down in history
 bindkey '^h' backward-word
 bindkey '^l' forward-word
 
-# I'm using this terminal a lot for time-tracking and task-tracking.
-# I'm keeping two separate "notebooks": one for personal efforts, and one for professional efforts.
-# Let's make it clear which one we're using:
 
-function enter_task_mode() {
-  if [[ $1 == "personal" ]]; then
-    # export TASKRC=~/.taskrc_personal
-    export TASKDATA=~/.local/share/task
-    export TIMEWARRIORDB=~/.local/share/timewarrior
-    # export JRNL_PATH=~/journal_personal.jrnl
-    export TASK_MODE="personal"
-    # Change prompt color (e.g., green for personal)
-    PROMPT='%F{green}%n@%m %1~ [%B$TASK_MODE%b]%f %# '
-  elif [[ $1 == "professional" ]]; then
-    export TASKDATA=~/.local/share/task_
-    export TIMEWARRIORDB=~/.local/share/timewarrior_work
-    # export JRNL_PATH=~/journal_professional.jrnl
-    export TASK_MODE="professional"
-    # Change prompt color (e.g., blue for professional)
-    PROMPT='%F{blue}%n@%m %1~ [%B$TASK_MODE%b]%f %# '
-  else
-    echo "Usage: enter_task_mode personal|professional, got $TASK_MODE"
-    return 1
-  fi
-  echo "Switched to $TASK_MODE mode."
+# # Display the clock time on the left
+# PROMPT='%F{5}[%D{%H:%M:%S}]%f %F{116}%(?:%1{ %} :%1{X%} )%c%f $(git_prompt_info)'
+# #
+# # Initialize variables for timing
+# typeset -g _aaron_start_time _aaron_real_time
+# # Record the start time before each command
+# preexec() {
+#   _aaron_start_time=$EPOCHREALTIME
+# }
+# # Calculate and display the command execution time on the right
+# precmd() {
+#   RPROMPT=
+#   if [[ -n $_aaron_start_time ]]; then
+#     _aaron_real_time=$EPOCHREALTIME
+#     elapsed_time=$(printf "%.2f" "$(($_aaron_real_time - _aaron_start_time))")
+#     RPROMPT="%F{4}${elapsed_time}s%f"
+#     unset _aaron_start_time
+#   fi
+# }
+
+# Left-side prompt showing current time and directory
+PROMPT='%F{5}[%D{%H:%M:%S}]%f %F{116}%c%f $(git_prompt_info)'
+
+# Initialize variables for timing
+typeset -g _aaron_start_time _aaron_real_time
+
+# Track the start time of each command
+preexec() {
+  _aaron_start_time=$EPOCHREALTIME
 }
 
-function switch_task_mode() {
-  if [[ "$TASK_MODE" == "personal" ]]; then
-    enter_task_mode "professional"
-  elif [[ "$TASK_MODE" == "professional" ]]; then
-    enter_task_mode "personal"
-  else
-    echo "Usage: switch_task_mode personal|professional, TASK_MODE currently is '$TASK_MODE'"
-    return 1
+# Calculate elapsed time and set RPROMPT with a success/failure indicator
+precmd() {
+  # have to cache exit status even before resetting RPROMPT
+  local exit_status=$?
+  RPROMPT=""
+
+  if [[ -n $_aaron_start_time ]]; then
+    _aaron_real_time=$EPOCHREALTIME
+    elapsed_time=$(printf "%.2f" "$(($_aaron_real_time - _aaron_start_time))")
+    
+    # Show the time of the previous command
+    RPROMPT="%F{4}${elapsed_time}s%f"
+    # Show the exit status of the previous command
+    if [[ $exit_status -eq 0 ]]; then
+      RPROMPT="$RPROMPT %F{2}✓%f"
+    else
+      RPROMPT="$RPROMPT %F{1}X%f"
+    fi
+    
+    # Clear start time after calculating elapsed time
+    unset _aaron_start_time
   fi
-  echo "Switched to $TASK_MODE mode."
 }
 
-# Not sure if I actually want to use the above features. Good to think about, is all.
-# Enter personal task mode!
-# if [[ -z "$TASK_MODE" ]]; then
-#   enter_task_mode personal
-# else
-#   enter_task_mode $TASK_MODE
-# fi
