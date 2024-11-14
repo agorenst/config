@@ -21,18 +21,24 @@ function etw() {
   nvim ~/.config/task/taskrc
 }
 
-# Per the below stackexchange link, this command makes the PATH variable deduplicate automatically.
-# https://unix.stackexchange.com/questions/62579/is-there-a-way-to-add-a-directory-to-my-path-in-zsh-only-if-its-not-already-pre
-typeset -U path PATH
-# Now add some things:
+# Adds to path only if it's not already there.
 function add_path() {
-  [[ -d "$1" ]] && path+=("$1")
+  [[ -d "$1" && ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH" && echo "Added $1 to path"
 }
 add_path "$HOME/go/bin"
 add_path "$HOME/.local/share/fnm"
+
+# And just in case:
+function remove_from_path() {
+  PATH=":${PATH}:"
+  PATH="${PATH//:$1:/:}"  # Remove the target directory
+  PATH="${PATH#:}"         # Remove leading colon, if any
+  PATH="${PATH%:}"         # Remove trailing colon, if any
+}
+
+# Load up fnm (node) as needed
 if [[ ! -z "$FNM_DIR" ]]; then
-  echo "HI"
-    eval "$(fnm env)"
+  eval "$(fnm env)"
 fi
 
 alias vim='nvim'
@@ -92,4 +98,3 @@ function switch_task_mode() {
 # else
 #   enter_task_mode $TASK_MODE
 # fi
-
