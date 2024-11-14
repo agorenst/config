@@ -68,6 +68,11 @@ function efc
   resrc
 end
 
+function etw
+  nvim_in_dir ~/.config/task
+  resrc
+end
+
 # Move To Config
 function mtc
   pushd ~/config
@@ -139,3 +144,6 @@ function fish_right_prompt
 end
 
 #################################################################################
+
+# Created by `pipx` on 2024-11-03 20:20:26
+set PATH $PATH /home/aaron/.local/bin
