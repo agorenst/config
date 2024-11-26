@@ -1,5 +1,4 @@
-function evc() {
-  # The /dev/null usage just makes sure we're silently updating our pwd stack
+function evc() { # The /dev/null usage just makes sure we're silently updating our pwd stack
   pushd $HOME/.config/nvim > /dev/null
   nvim .
   popd > /dev/null
@@ -12,8 +11,8 @@ function etx() {
 }
 
 function erc() {
-  nvim ~/.zshrc.personal
-  source ~/.zshrc.personal
+  nvim ~/.config/zshrc.personal
+  source ~/.config/zshrc.personal
   echo "Reloaded zshrc.personal"
 }
 
@@ -26,7 +25,6 @@ function add_path() {
   [[ -d "$1" && ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH" && echo "Added $1 to path"
 }
 add_path "$HOME/go/bin"
-add_path "$HOME/.local/share/fnm"
 
 # And just in case:
 function remove_from_path() {
@@ -36,8 +34,12 @@ function remove_from_path() {
   PATH="${PATH%:}"         # Remove trailing colon, if any
 }
 
+# To install this, see the one-liner script here: https://github.com/Schniz/fnm
+# And then I need some command like: fnm install 22.11.0
+# Weird permissions issues with run/1000 directoy may be resolved by: https://github.com/Schniz/fnm/issues/1119
+add_path "$HOME/.local/share/fnm"
 # Load up fnm (node) as needed
-if [[ ! -z "$FNM_DIR" ]]; then
+if [[ ! -v FNM_DIR ]]; then
   eval "$(fnm env)"
 fi
 
