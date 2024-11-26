@@ -40,6 +40,8 @@ function remove_from_path() {
 add_path "$HOME/.local/share/fnm"
 # Load up fnm (node) as needed
 if [[ ! -v FNM_DIR ]]; then
+  sudo mkdir -p $XDG_RUNTIME_DIR
+  sudo chown -R $(whoami) $XDG_RUNTIME_DIR
   eval "$(fnm env)"
 fi
 
