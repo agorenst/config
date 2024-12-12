@@ -1,11 +1,6 @@
-# [Created by task 3.2.0 11/20/2024 22:59:59]
-data.location=/home/aaron/.task
 news.version=3.2.0
 
-# To use the default location of the XDG directories,
-# move this configuration file from ~/.taskrc to ~/.config/task/taskrc and update location config as follows:
-
-data.location=~/.local/share/task
+data.location=$ONEDRIVE_PATH/Documents/taskwarrior/task
 hooks.location=~/.config/task/hooks
 
 # Color theme (uncomment one to use)
@@ -25,6 +20,7 @@ hooks.location=~/.config/task/hooks
 #include solarized-light-256.theme
 #include no-color.theme
 
+# User defined types
 # Impact
 uda.impact.type=numeric
 uda.impact.label=Impact
@@ -42,3 +38,9 @@ uda.estimate.label=Estimate
 
 report.next.columns=id,depends,priority,project,tags,recur,scheduled.countdown,estimate,due.relative,until.remaining,description,impact,urgency
 report.next.labels= ID,Deps,P,Project,Tag,Recur,S,E,Due,Until,Description,I,Urg
+
+# Case insensitve searching:
+#rc.regex.case=insensitive
+search.case.sensitive=no
+
+default.time=08:00:00

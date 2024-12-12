@@ -22,7 +22,7 @@ function etw() {
 
 # Adds to path only if it's not already there.
 function add_path() {
-  [[ -d "$1" && ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH" && echo "Added $1 to path"
+  [[ -d "$1" && ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH"
 }
 add_path "$HOME/go/bin"
 
@@ -40,8 +40,7 @@ function remove_from_path() {
 add_path "$HOME/.local/share/fnm"
 # Load up fnm (node) as needed
 if [[ ! -v FNM_DIR ]]; then
-  sudo mkdir -p $XDG_RUNTIME_DIR
-  sudo chown -R $(whoami) $XDG_RUNTIME_DIR
+  export XDG_RUNTIME_DIR="$HOME/.cache/xdgr"
   eval "$(fnm env)"
 fi
 
@@ -53,8 +52,11 @@ export EDITOR='nvim'
 # # Custom keybindings for Vim-like movements
 bindkey '^k' up-line-or-history     # Ctrl-k to move up in history
 bindkey '^j' down-line-or-history   # Ctrl-j to move down in history
-bindkey '^h' backward-word
+bindkey '^h' backward-kill-word     # This is for ctrl-backspace, and has this unfortunate (Or intended?) overlap with vimkeys
 bindkey '^l' forward-word
+
+# WSL integration:
+export ONEDRIVE_PATH=$(wslpath $(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('OneDrive') | Out-String" | tr -d '\r\n'))
 
 
 # Left-side prompt showing current time and directory
