@@ -40,52 +40,50 @@ vim.g.clipboard = { -- startup improvement https://github.com/neovim/neovim/issu
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Most of this is all from https://www.youtube.com/watch?v=ZjMzBd1Dqz8, around the 35 minute mark.
-local opt = vim.opt
-
 -- Tabs
-opt.tabstop = 2 -- how many chars tab takes up
-opt.shiftwidth = 2
-opt.softtabstop = 2
-opt.expandtab = true
-opt.smartindent = true
-opt.wrap = false
+vim.opt.tabstop = 2 -- how many chars tab takes up
+vim.opt.shiftwidth = 2
+vim.opt.softtabstop = 2
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.wrap = false
 
 -- Search
-opt.incsearch = true
-opt.ignorecase = true -- this is also for autocomplete of commands
-opt.smartcase = true
+vim.opt.incsearch = true
+vim.opt.ignorecase = true -- this is also for autocomplete of commands
+vim.opt.smartcase = true
 
 -- Appearance
-opt.number = true
+vim.opt.number = true
 -- opt.colorcolumn = "96" Don't really like this TBH.
-opt.signcolumn = "yes"
-opt.cmdheight = 1
-opt.scrolloff = 6
-opt.completeopt = "menuone,noinsert,noselect" -- TODO revisit this
-opt.wrap = true
-opt.linebreak = true
-opt.breakindent = true
-opt.termguicolors = true
+vim.opt.signcolumn = "yes"
+vim.opt.cmdheight = 1
+vim.opt.scrolloff = 6
+vim.opt.completeopt = "menuone,noinsert,noselect" -- TODO revisit this
+vim.opt.wrap = true
+vim.opt.linebreak = true
+vim.opt.breakindent = true
+vim.opt.termguicolors = true
 
 -- Behavior
-opt.hidden = true -- TODO revisit this
-opt.errorbells = false
-opt.swapfile = false
-opt.backup = false
+vim.opt.hidden = true -- TODO revisit this
+vim.opt.errorbells = false
+vim.opt.swapfile = false
+vim.opt.backup = false
 -- opt.undodir = vim.fn.expand("~/.vim/undodir") -- TODO: Revisit this
 -- opt.undofile = true
-opt.backspace = "indent,eol,start"
-opt.splitright = true
-opt.splitbelow = true
-opt.clipboard = "unnamedplus"
-opt.modifiable = true
+vim.opt.backspace = "indent,eol,start"
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+vim.opt.clipboard = "unnamedplus"
+vim.opt.modifiable = true
 
 -- Spelling
-opt.spell = true
-opt.spelllang = { "en_us", }
+vim.opt.spell = true
+vim.opt.spelllang = { "en_us", }
 vim.cmd("syntax spell toplevel")
 
-opt.virtualedit = "block"
+vim.opt.virtualedit = "block"
 
 -- opt.autochdir = true -- this doesn't play well with telescope...
 -- opt.shada = "'100" -- Ensure shada stores last cursor positions -- this isn't working?
@@ -106,15 +104,14 @@ vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-local keymap = vim.keymap
-keymap.set("i", "jk", "<esc>", { noremap = true, })
-keymap.set("n", ";", ":", { noremap = true, })
-keymap.set("i", "<c-v>", "<esc>pi", { noremap = true, })
+vim.keymap.set("i", "jk", "<esc>", { noremap = true, })
+vim.keymap.set("n", ";", ":", { noremap = true, })
+vim.keymap.set("i", "<c-v>", "<esc>pi", { noremap = true, })
 
 -- https://www.reddit.com/r/neovim/comments/okbag3/how_can_i_remap_ctrl_backspace_to_delete_a_word/ which cites:
 -- https://unix.stackexchange.com/questions/203418/bind-c-i-and-tab-keys-to-different-commands-in-terminal-applications-via-inputr/203521#203521
 -- This let's me do ctrl-backspace to do delete-word.
-keymap.set("i", "<c-h>", "<c-w>", { noremap = true, })
+vim.keymap.set("i", "<c-h>", "<c-w>", { noremap = true, })
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -159,6 +156,49 @@ vim.api.nvim_create_autocmd("BufWritePost", {
   pattern = "*.bib",
   callback = function()
     vim.cmd("silent !bibtex-tidy " .. vim.fn.shellescape(vim.fn.expand("%:p")))
+  end,
+})
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Set up LSP
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "c", "cpp", },
+  callback = function(ev)
+    vim.lsp.start({
+      name = "clangd",
+      cmd = { "clangd", },
+      root_dir = vim.fs.root(ev.buf, {
+        "compile_commands.json",
+        ".clangd",
+      }),
+    })
+  end,
+})
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    -- Not sure if this captures the dependencies correctly,
+    -- will this autocommand unconditionally wait until telescope is loaded?
+    local builtin = require("telescope.builtin")
+    if client.supports_method("textDocument/documentSymbol") then
+      vim.keymap.set("n", "<leader>lds", builtin.lsp_document_symbols, {})
+    end
+    if client.supports_method("workspace/symbol") then
+      vim.keymap.set("n", "<leader>lws", builtin.lsp_workspace_symbols, {})
+    end
+    if client.supports_method("textDocument/references") then
+      vim.keymap.set("n", "<leader>lr", builtin.lsp_references, {})
+    end
+    -- Can't this be subsumed by some tags keymap?
+    if client.supports_method("textDocument/definition") then
+      vim.keymap.set("n", "<leader>gd", builtin.lsp_definitions, {})
+    end
   end,
 })
 
@@ -224,116 +264,27 @@ require("lazy").setup({
       },
     },
     {
+      "vimwiki/vimwiki",
+      init = function()
+        vim.g.vimwiki_list = {
+          {
+            path = "~/vimwiki",
+            syntax = "markdown",
+            ext = ".wiki.md",
+            links_space_char = "-",
+            diary_frequency = "weekly",
+            diary_start_week_day = "sunday",
+            diary_rel_path = "",
+          },
+        }
+      end,
+    },
+    {
       "williamboman/mason.nvim",
       config = function()
         require("mason").setup({})
       end,
       lazy = false,
-    },
-    {
-      "neovim/nvim-lspconfig",
-      dependencies = {
-        "williamboman/mason.nvim",
-      },
-      lazy = false,
-      config = function()
-        local cmp_nvim_lsp = require("cmp_nvim_lsp")
-        local lspconfig = require("lspconfig")
-
-        local capabilities = cmp_nvim_lsp.default_capabilities()
-        capabilities.offset_encoding = { "utf-8", }
-
-        local lsp_fmt_group = vim.api.nvim_create_augroup("LspFormattingGroup", {})
-        local on_attach = function(client, buffer)
-          -- Per https://neovim.io/doc/user/lsp.html#_quickstart we have the default mappings:
-          -- "grn" is mapped in Normal mode to vim.lsp.buf.rename()
-          -- "gra" is mapped in Normal and Visual mode to vim.lsp.buf.code_action()
-          -- "grr" is mapped in Normal mode to vim.lsp.buf.references()
-          -- CTRL-S is mapped in Insert mode to vim.lsp.buf.signature_help()
-
-          -- vim.keymap.set("n", "gd", vim.lsp.buf.definition)
-          -- vim.keymap.set("n", "gD", vim.lsp.buf.declaration)
-          -- vim.keymap.set("n", "gr", vim.lsp.buf.references)
-          -- vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
-          -- vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
-
-          vim.keymap.set("n", "grn", vim.lsp.buf.rename)
-          vim.keymap.set("n", "gra", vim.lsp.buf.code_action)
-          vim.keymap.set("n", "grr", vim.lsp.buf.references)
-          vim.keymap.set("n", "gri", vim.lsp.buf.incoming_calls)
-
-          vim.keymap.set("n", "grd", vim.lsp.buf.definition)
-          vim.keymap.set("n", "grD", vim.lsp.buf.declaration)
-          vim.keymap.set("n", "grs", vim.lsp.buf.signature_help)
-          vim.keymap.set("n", "ged", vim.diagnostic.open_float)
-
-          -- Formatting on save
-          if client.server_capabilities.documentFormattingProvider then
-            vim.api.nvim_clear_autocmds({ group = lsp_fmt_group, buffer = buffer, })
-            vim.api.nvim_create_autocmd("BufWritePre", {
-              group = lsp_fmt_group,
-              buffer = buffer,
-              callback = function()
-                vim.lsp.buf.format({ async = false, })
-              end,
-            })
-          end
-        end
-
-        -- lua
-        lspconfig.lua_ls.setup({
-          capabilities = capabilities,
-          on_attach = on_attach,
-          settings = {
-            Lua = {
-              diagnostics = {
-                globals = { "vim", },
-              },
-              format = {
-                -- This is basically what we'd apply.
-                defaultConfig = {
-                  quote_style = "double",
-                  trailing_table_separator = "always",
-                },
-              },
-              workspace = {
-                library = {
-                  [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-                  [vim.fn.stdpath("config") .. "/lua"] = true,
-                },
-              },
-            },
-          },
-        })
-
-        -- python
-        lspconfig.pyright.setup({
-          capabilities = capabilities,
-          on_attach = on_attach,
-        })
-
-        -- c, cpp, cuda
-        lspconfig.clangd.setup({
-          capabilities = capabilities,
-          on_attach = on_attach,
-        })
-
-        lspconfig.rust_analyzer.setup({
-          capabilities = capabilities,
-          on_attach = on_attach,
-        })
-
-        lspconfig.marksman.setup({
-          capabilities = capabilities,
-          on_attach = on_attach,
-        })
-
-        -- Can't install LSP with node gunk.
-        -- lspconfig.fish_lsp.setup({
-        --   capabilities = capabilities,
-        --   on_attach = on_attach,
-        -- })
-      end,
     },
     {
       -- Autocompletion engine
@@ -382,7 +333,6 @@ require("lazy").setup({
             "rust", "toml",
             -- scripting etc.
             "bash",
-            "fish", -- not able to install the LSP for now...
             "make",
             "dot",
             "lua",
@@ -456,6 +406,7 @@ require("lazy").setup({
                 ["<C-k>"] = actions.move_selection_previous,
               },
             },
+            layout_strategy = "vertical",
           },
         })
         -- Set the keymapping:
