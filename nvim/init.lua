@@ -113,6 +113,7 @@ vim.keymap.set("i", "<c-v>", "<esc>pi", { noremap = true, })
 -- This let's me do ctrl-backspace to do delete-word.
 vim.keymap.set("i", "<c-h>", "<c-w>", { noremap = true, })
 
+
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -176,6 +177,7 @@ vim.api.nvim_create_autocmd("FileType", {
         "compile_commands.json",
         ".clangd",
       }),
+      capabilities = require("blink.cmp").get_lsp_capabilities(),
     })
   end,
 })
@@ -185,19 +187,19 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     -- Not sure if this captures the dependencies correctly,
     -- will this autocommand unconditionally wait until telescope is loaded?
-    local builtin = require("telescope.builtin")
+    local fzf = require("fzf-lua")
     if client.supports_method("textDocument/documentSymbol") then
-      vim.keymap.set("n", "<leader>lds", builtin.lsp_document_symbols, {})
+      vim.keymap.set("n", "<leader>lds", fzf.lsp_document_symbols, {})
     end
     if client.supports_method("workspace/symbol") then
-      vim.keymap.set("n", "<leader>lws", builtin.lsp_workspace_symbols, {})
+      vim.keymap.set("n", "<leader>lws", fzf.lsp_workspace_symbols, {})
     end
     if client.supports_method("textDocument/references") then
-      vim.keymap.set("n", "<leader>lr", builtin.lsp_references, {})
+      vim.keymap.set("n", "<leader>lr", fzf.lsp_references, {})
     end
     -- Can't this be subsumed by some tags keymap?
     if client.supports_method("textDocument/definition") then
-      vim.keymap.set("n", "<leader>gd", builtin.lsp_definitions, {})
+      vim.keymap.set("n", "<leader>gd", fzf.lsp_definitions, {})
     end
   end,
 })
@@ -214,10 +216,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
-    {
-      "micangl/cmp-vimtex",
-      lazy = false,
-    },
     {
       "lervag/vimtex",
       config = function()
@@ -280,47 +278,6 @@ require("lazy").setup({
       end,
     },
     {
-      "williamboman/mason.nvim",
-      config = function()
-        require("mason").setup({})
-      end,
-      lazy = false,
-    },
-    {
-      -- Autocompletion engine
-      "hrsh7th/nvim-cmp",
-      dependencies = {
-        "hrsh7th/cmp-nvim-lsp", -- LSP source for nvim-cmp
-        "hrsh7th/cmp-buffer",   -- Buffer source for nvim-cmp
-        "hrsh7th/cmp-path",     -- Filesystem paths
-        "hrsh7th/cmp-cmdline",  -- Cmdline completion
-        "L3MON4D3/LuaSnip",     -- Snippet engine
-      },
-      config = function()
-        local cmp = require("cmp")
-        cmp.setup({
-          snippet = {
-            expand = function(args)
-              require("luasnip").lsp_expand(args.body) -- For `luasnip` users
-            end,
-          },
-          mapping = {
-            ["<c-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert, }),
-            ["<tab>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert, }),
-            ["<c-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert, }),
-            ["<cr>"] = cmp.mapping.confirm({ select = true, }),
-          },
-          sources = cmp.config.sources({
-            { name = "nvim_lsp", }, -- LSP-based completion
-            { name = "luasnip", },
-            -- { name = "buffer" }, -- Buffer-based completion
-            { name = "path", },   -- Path-based completion
-            { name = "vimtex", }, -- https://github.com/micangl/cmp-vimtex
-          }),
-        })
-      end,
-    },
-    {
       "nvim-treesitter/nvim-treesitter",
       lazy = false,
       config = function()
@@ -365,59 +322,82 @@ require("lazy").setup({
       },
     },
     {
-      "nvim-telescope/telescope.nvim",
-      dependencies = { "nvim-lua/plenary.nvim", },
-      lazy = false,
+      'saghen/blink.cmp',
+      -- optional: provides snippets for the snippet source
+      -- dependencies = 'rafamadriz/friendly-snippets',
+
+      -- use a release tag to download pre-built binaries
+      version = 'v0.*',
+      -- AND/OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+      -- build = 'cargo build --release',
+      -- If you use nix, you can build from source using latest nightly rust with:
+      -- build = 'nix run .#build-plugin',
+
+      ---@module 'blink.cmp'
+      ---@type blink.cmp.Config
+      opts = {
+        -- 'default' for mappings similar to built-in completion
+        -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys to navigate)
+        -- 'enter' for mappings similar to 'super-tab' but with 'enter' to accept
+        -- see the "default configuration" section below for full documentation on how to define
+        -- your own keymap.
+        keymap = { preset = 'enter' },
+
+        appearance = {
+          -- Sets the fallback highlight groups to nvim-cmp's highlight groups
+          -- Useful for when your theme doesn't support blink.cmp
+          -- will be removed in a future release
+          use_nvim_cmp_as_default = true,
+          -- Set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+          -- Adjusts spacing to ensure icons are aligned
+          nerd_font_variant = 'mono'
+        },
+
+        -- default list of enabled providers defined so that you can extend it
+        -- elsewhere in your config, without redefining it, via `opts_extend`
+        sources = {
+          default = {
+            'lsp', 
+            'path',
+            -- 'snippets',
+            'buffer',
+          },
+          -- optionally disable cmdline completions
+          -- cmdline = {},
+        },
+
+        -- experimental signature help support
+        -- signature = { enabled = true }
+      },
+      -- allows extending the providers array elsewhere in your config
+      -- without having to redefine it
+      opts_extend = { "sources.default" }
+    },
+    {
+      "ibhagwan/fzf-lua",
+      lazy=false,
+      -- optional for icon support
+      dependencies = { "nvim-tree/nvim-web-devicons" },
       config = function()
-        local actions = require("telescope.actions")
-        require("telescope").setup({
-          defaults = {
-            -- From wiki: disable preview on binary files.
-            buffer_previewer_maker = function(filepath, bufnr, opts)
-              local Job = require("plenary.job")
-              local previewers = require("telescope.previewers")
-              filepath = vim.fn.expand(filepath)
-              Job:new({
-                command = "file",
-                args = { "--mime-type", "-b", filepath, },
-                on_exit = function(j)
-                  local mime_type = vim.split(j:result()[1], "/")[1]
-                  if mime_type == "text" then
-                    previewers.buffer_previewer_maker(filepath, bufnr, opts)
-                  else
-                    -- maybe we want to write something to the buffer here
-                    vim.schedule(function()
-                      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "===BINARY===", })
-                    end)
-                  end
-                end,
-              }):sync()
-            end,
-
-
-            file_sorter = require("telescope.sorters").get_fuzzy_file, -- allow for fuzzy matching
-            mappings = {
-              i = {
-                ["<C-j>"] = actions.move_selection_next,
-                ["<C-k>"] = actions.move_selection_previous,
-              },
-              n = {
-                ["<C-j>"] = actions.move_selection_next,
-                ["<C-k>"] = actions.move_selection_previous,
-              },
+        -- -- calling `setup` is optional for customization
+        fzf = require("fzf-lua")
+        fzf.setup({
+          winopts = {
+            preview = {
+              layout='vertical',
             },
-            layout_strategy = "vertical",
+          },
+          files = {
+            formatter="path.filename_first",
+            path_shorten = 3,
           },
         })
-        -- Set the keymapping:
-        local builtin = require("telescope.builtin")
-        vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files", })
-        vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Telescope live grep", })
-        vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers", })
-        vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags", })
-        vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Telescope keymaps", })
-        -- vim.keymap.set("n", "<leader>f/",
-        --   require("telescope.builtin").current_buffer_fuzzy_find { desc = "Telescope search", })
+
+        vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "fzf find files", })
+        vim.keymap.set("n", "<leader>fg", fzf.live_grep, { desc = "fzf live grep", })
+        vim.keymap.set("n", "<leader>fb", fzf.buffers, { desc = "fzf buffers", })
+        vim.keymap.set("n", "<leader>fh", fzf.helptags, { desc = "fzf help tags", })
+        vim.keymap.set("n", "<leader>fk", fzf.keymaps, { desc = "fzf keymaps", })
       end,
     },
   },
@@ -426,3 +406,4 @@ require("lazy").setup({
   install = { colorscheme = { "tokyonight", }, },
   checker = { enabled = false, }, -- don't check for updates.
 })
+
