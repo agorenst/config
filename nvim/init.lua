@@ -34,6 +34,10 @@ vim.g.clipboard = { -- startup improvement https://github.com/neovim/neovim/issu
   },
 }
 
+-- Disable netrw per neovim-tree documentation
+vim.g.loaded_netrw       = 1
+vim.g.loaded_netrwPlugin = 1
+
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- OPTIONS
@@ -380,7 +384,7 @@ require("lazy").setup({
       dependencies = { "nvim-tree/nvim-web-devicons" },
       config = function()
         -- -- calling `setup` is optional for customization
-        fzf = require("fzf-lua")
+        local fzf = require("fzf-lua")
         fzf.setup({
           winopts = {
             preview = {
@@ -398,6 +402,29 @@ require("lazy").setup({
         vim.keymap.set("n", "<leader>fb", fzf.buffers, { desc = "fzf buffers", })
         vim.keymap.set("n", "<leader>fh", fzf.helptags, { desc = "fzf help tags", })
         vim.keymap.set("n", "<leader>fk", fzf.keymaps, { desc = "fzf keymaps", })
+      end,
+    },
+    {
+      "nvim-tree/nvim-tree.lua",
+      version = "*",
+      lazy = false,
+      dependencies = {
+        "nvim-tree/nvim-web-devicons",
+      },
+      config = function()
+        require("nvim-tree").setup({
+          view = {
+            float = {
+              enable=true,
+            },
+          },
+        })
+
+        local api = require("nvim-tree.api")
+        vim.keymap.set("n", "<leader>tt", function()
+          api.tree.open({find_file=true})
+        end, { desc = "toggle neovim-tree" })
+        vim.keymap.set("n", "<leader>tT", api.tree.toggle, { desc = "toggle neovim-tree global view" })
       end,
     },
   },
