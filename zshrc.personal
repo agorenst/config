@@ -1,6 +1,6 @@
 function evc() { # The /dev/null usage just makes sure we're silently updating our pwd stack
   pushd $HOME/.config/nvim > /dev/null
-  nvim .
+  nvim
   popd > /dev/null
 }
 

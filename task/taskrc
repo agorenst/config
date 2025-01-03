@@ -1,5 +1,6 @@
-news.version=3.2.0
+news.version=3.1.0
 
+# This requires intelligence in my zshrc file, and is obviously WSL-only.
 data.location=$ONEDRIVE_PATH/Documents/taskwarrior/task
 hooks.location=~/.config/task/hooks
 
