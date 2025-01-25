@@ -269,11 +269,11 @@ require("lazy").setup({
       init = function()
         vim.g.vimwiki_list = {
           {
-            path = "~/vimwiki",
+            path = "$ONEDRIVE_PATH/Documents/vimwiki",
             syntax = "markdown",
             ext = ".wiki.md",
             links_space_char = "-",
-            diary_frequency = "weekly",
+            --diary_frequency = "weekly",
             diary_start_week_day = "sunday",
             diary_rel_path = "",
           },
@@ -342,6 +342,7 @@ require("lazy").setup({
         -- https://cmp.saghen.dev/configuration/keymap.html
         keymap = {
           preset = 'none',
+          ['<S-Tab>'] = { 'select_prev', 'fallback' },
           ['<Tab>'] = { 'select_next', 'fallback' },
           ['<C-j>'] = { 'select_next', 'fallback' },
           ['<C-n>'] = { 'select_next', 'fallback' },
@@ -352,7 +353,7 @@ require("lazy").setup({
         },
         completion = {
           list = {
-            selection = 'manual',
+            selection = { preselect = false, auto_insert = false },
           },
         },
 
@@ -373,7 +374,7 @@ require("lazy").setup({
             'lsp', 
             'path',
             -- 'snippets',
-            'buffer',
+            -- 'buffer',
           },
           -- optionally disable cmdline completions
           -- cmdline = {},
