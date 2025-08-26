@@ -187,6 +187,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup('my.lsp', {}),
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     -- Not sure if this captures the dependencies correctly,
@@ -204,6 +205,15 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- Can't this be subsumed by some tags keymap?
     if client.supports_method("textDocument/definition") then
       vim.keymap.set("n", "<leader>gd", fzf.lsp_definitions, {})
+    end
+    if client.supports_method("textDocument/formatting") then
+      vim.api.nvim_create_autocmd('BufWritePre', {
+        group = vim.api.nvim_create_augroup('my.lsp', {clear=false}),
+        buffer = args.buf,
+        callback = function()
+          vim.lsp.buf.format({ bufnr = args.buf, id = client.id, timeout_ms = 1000, async = false })
+        end,
+      })
     end
   end,
 })
