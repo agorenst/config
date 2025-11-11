@@ -20,9 +20,9 @@ vim.opt.rtp:prepend(lazypath)
 -- GLOBALS
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
-vim.g.clipboard = { -- startup improvement https://github.com/neovim/neovim/issues/9570
+vim.g.mapleader          = " "
+vim.g.maplocalleader     = " "
+vim.g.clipboard          = { -- startup improvement https://github.com/neovim/neovim/issues/9570
   name = "xclip",
   copy = {
     ["+"] = "xclip -selection clipboard",
@@ -45,46 +45,46 @@ vim.g.loaded_netrwPlugin = 1
 --------------------------------------------------------------------------------
 -- Most of this is all from https://www.youtube.com/watch?v=ZjMzBd1Dqz8, around the 35 minute mark.
 -- Tabs
-vim.opt.tabstop = 2 -- how many chars tab takes up
-vim.opt.shiftwidth = 2
-vim.opt.softtabstop = 2
-vim.opt.expandtab = true
-vim.opt.smartindent = true
-vim.opt.wrap = false
+vim.opt.tabstop          = 2 -- how many chars tab takes up
+vim.opt.shiftwidth       = 2
+vim.opt.softtabstop      = 2
+vim.opt.expandtab        = true
+vim.opt.smartindent      = true
+vim.opt.wrap             = false
 
 -- Search
-vim.opt.incsearch = true
-vim.opt.ignorecase = true -- this is also for autocomplete of commands
-vim.opt.smartcase = true
+vim.opt.incsearch        = true
+vim.opt.ignorecase       = true -- this is also for autocomplete of commands
+vim.opt.smartcase        = true
 
 -- Appearance
-vim.opt.number = true
+vim.opt.number           = true
 -- opt.colorcolumn = "96" Don't really like this TBH.
-vim.opt.signcolumn = "yes"
-vim.opt.cmdheight = 1
-vim.opt.scrolloff = 6
-vim.opt.completeopt = "menuone,noinsert,noselect" -- TODO revisit this
-vim.opt.wrap = true
-vim.opt.linebreak = true
-vim.opt.breakindent = true
-vim.opt.termguicolors = true
+vim.opt.signcolumn       = "yes"
+vim.opt.cmdheight        = 1
+vim.opt.scrolloff        = 6
+vim.opt.completeopt      = "menuone,noinsert,noselect" -- TODO revisit this
+vim.opt.wrap             = true
+vim.opt.linebreak        = true
+vim.opt.breakindent      = true
+vim.opt.termguicolors    = true
 
 -- Behavior
-vim.opt.hidden = true -- TODO revisit this
-vim.opt.errorbells = false
-vim.opt.swapfile = false
-vim.opt.backup = false
+vim.opt.hidden           = true -- TODO revisit this
+vim.opt.errorbells       = false
+vim.opt.swapfile         = false
+vim.opt.backup           = false
 -- opt.undodir = vim.fn.expand("~/.vim/undodir") -- TODO: Revisit this
 -- opt.undofile = true
-vim.opt.backspace = "indent,eol,start"
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-vim.opt.clipboard = "unnamedplus"
-vim.opt.modifiable = true
+vim.opt.backspace        = "indent,eol,start"
+vim.opt.splitright       = true
+vim.opt.splitbelow       = true
+vim.opt.clipboard        = "unnamedplus"
+vim.opt.modifiable       = true
 
 -- Spelling
-vim.opt.spell = true
-vim.opt.spelllang = { "en_us", }
+vim.opt.spell            = true
+vim.opt.spelllang        = { "en_us", }
 vim.cmd("syntax spell toplevel")
 
 vim.opt.virtualedit = "block"
@@ -121,56 +121,28 @@ vim.keymap.set("i", "<c-h>", "<c-w>", { noremap = true, })
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
--- AUTOMATICALLY SAVE SESSIONS
+-- Set up LSPs
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
--- Run these functions on entering and leaving Neovim
--- Turning these off: they had trouble with opening new buffers, etc.
--- vim.api.nvim_create_autocmd("VimEnter", {
---   callback = function()
---     local cwd = vim.fn.getcwd()
---     local session_file = cwd:gsub("[/\\]", "_") .. ".vim" -- Convert the path to a file-safe format
---     local session_path = vim.fn.stdpath("data") .. "/sessions/" .. session_file
---
---     if vim.fn.filereadable(session_path) == 1 then
---       vim.cmd("silent! source " .. session_path) -- Load the session if it exists
---     end
---   end,
--- })
---
--- vim.api.nvim_create_autocmd("VimLeavePre", {
---   callback = function()
---     local cwd = vim.fn.getcwd()
---     local session_file = cwd:gsub("[/\\]", "_") .. ".vim" -- Convert the path to a file-safe format
---     local session_path = vim.fn.stdpath("data") .. "/sessions/" .. session_file
---
---     -- Ensure the session directory exists
---     vim.fn.mkdir(vim.fn.stdpath("data") .. "/sessions", "p")
---
---     -- Save the current session to the specified path
---     vim.cmd("mksession! " .. session_path)
---   end,
--- })
 
+-- I just use lua for neovim, so this is just to make life easier with that.
+vim.lsp.config['lua_ls'] = {
+  -- Command and arguments to start the server.
+  cmd = { 'lua-language-server' },
+  -- Filetypes to automatically attach to.
+  filetypes = { 'lua' },
+  root_markers = { { '.luarc.json', '.luarc.jsonc' }, '.git' },
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = { "vim" }, -- see https://stackoverflow.com/questions/79647620/undefined-global-vim
+      }
+    }
+  }
+}
+vim.lsp.enable('lua_ls')
 
---------------------------------------------------------------------------------
--- Bibtex formatting. Format on save. Frustrating this isn't built in, oh well.
---------------------------------------------------------------------------------
-vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = "*.bib",
-  callback = function()
-    vim.cmd("silent !bibtex-tidy " .. vim.fn.shellescape(vim.fn.expand("%:p")))
-  end,
-})
-
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
--- Set up LSP
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "c", "cpp", },
   callback = function(ev)
@@ -186,6 +158,26 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "typ", "typst" },
+  callback = function(ev)
+    vim.lsp.start({
+      name = "tinymist",
+      cmd = { "tinymist", },
+      root_dir = vim.fs.root(ev.buf, {
+        ".git",
+      }),
+      capabilities = require("blink.cmp").get_lsp_capabilities(),
+      settings = {
+        formatterMode = "typstyle",
+      }
+    })
+  end,
+})
+
+
+vim.g.typst_cmd = make -- use my own makefiles
+
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup('my.lsp', {}),
   callback = function(args)
@@ -193,22 +185,22 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- Not sure if this captures the dependencies correctly,
     -- will this autocommand unconditionally wait until telescope is loaded?
     local fzf = require("fzf-lua")
-    if client.supports_method("textDocument/documentSymbol") then
+    if client:supports_method("textDocument/documentSymbol") then
       vim.keymap.set("n", "<leader>lds", fzf.lsp_document_symbols, {})
     end
-    if client.supports_method("workspace/symbol") then
+    if client:supports_method("workspace/symbol") then
       vim.keymap.set("n", "<leader>lws", fzf.lsp_workspace_symbols, {})
     end
-    if client.supports_method("textDocument/references") then
+    if client:supports_method("textDocument/references") then
       vim.keymap.set("n", "<leader>lr", fzf.lsp_references, {})
     end
     -- Can't this be subsumed by some tags keymap?
-    if client.supports_method("textDocument/definition") then
+    if client:supports_method("textDocument/definition") then
       vim.keymap.set("n", "<leader>gd", fzf.lsp_definitions, {})
     end
-    if client.supports_method("textDocument/formatting") then
+    if client:supports_method("textDocument/formatting") then
       vim.api.nvim_create_autocmd('BufWritePre', {
-        group = vim.api.nvim_create_augroup('my.lsp', {clear=false}),
+        group = vim.api.nvim_create_augroup('my.lsp', { clear = false }),
         buffer = args.buf,
         callback = function()
           vim.lsp.buf.format({ bufnr = args.buf, id = client.id, timeout_ms = 1000, async = false })
@@ -359,7 +351,7 @@ require("lazy").setup({
           ['<C-k>'] = { 'select_prev', 'fallback' },
           ['<C-p>'] = { 'select_prev', 'fallback' },
           ['<CR>'] = { 'accept', 'fallback' },
-          ['<Esc>'] = { 'hide', 'fallback'},
+          ['<Esc>'] = { 'hide', 'fallback' },
         },
         completion = {
           list = {
@@ -381,7 +373,7 @@ require("lazy").setup({
         -- elsewhere in your config, without redefining it, via `opts_extend`
         sources = {
           default = {
-            'lsp', 
+            'lsp',
             'path',
             -- 'snippets',
             -- 'buffer',
@@ -399,7 +391,7 @@ require("lazy").setup({
     },
     {
       "ibhagwan/fzf-lua",
-      lazy=false,
+      lazy = false,
       -- optional for icon support
       dependencies = { "nvim-tree/nvim-web-devicons" },
       config = function()
@@ -408,13 +400,12 @@ require("lazy").setup({
         fzf.setup({
           winopts = {
             preview = {
-              layout='vertical',
+              layout = 'vertical',
             },
           },
-          files = {
-            formatter="path.filename_first",
-            path_shorten = 3,
-          },
+          -- files = {
+          --   formatter="path.filename_first",
+          -- },
         })
 
         vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "fzf find files", })
@@ -438,14 +429,14 @@ require("lazy").setup({
         require("nvim-tree").setup({
           view = {
             float = {
-              enable=true,
+              enable = true,
             },
           },
         })
 
         local api = require("nvim-tree.api")
         vim.keymap.set("n", "<leader>tt", function()
-          api.tree.open({find_file=true})
+          api.tree.open({ find_file = true })
         end, { desc = "toggle neovim-tree" })
         vim.keymap.set("n", "<leader>tT", api.tree.toggle, { desc = "toggle neovim-tree global view" })
       end,
@@ -456,4 +447,3 @@ require("lazy").setup({
   install = { colorscheme = { "tokyonight", }, },
   checker = { enabled = false, }, -- don't check for updates.
 })
-
