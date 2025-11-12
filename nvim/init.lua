@@ -61,7 +61,6 @@ vim.opt.shiftwidth       = 2
 vim.opt.softtabstop      = 2
 vim.opt.expandtab        = true
 vim.opt.smartindent      = true
-vim.opt.wrap             = false
 
 -- Search
 vim.opt.incsearch        = true
@@ -183,6 +182,13 @@ vim.lsp.config['lua_ls'] = {
   },
 }
 vim.lsp.enable('lua_ls')
+
+vim.lsp.config['bashls'] = {
+  cmd = { 'bash-language-server', 'start' },
+  filetypes = { 'sh', 'zsh' }, -- It works for both!
+  root_dir = vim.fs.root(0, { '.git' }), -- Uses .git as project root
+}
+vim.lsp.enable('bashls')
 
 
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -317,7 +323,7 @@ setup_plugin("nvim-treesitter.configs", function(ts_configs)
   ts_configs.setup({
     ensure_installed = {
       "c", "cpp", "python", "rust", "toml", "bash", "make", "typst",
-      "dot", "lua", "vim", "vimdoc", "query", "bibtex", "beancount", "markdown",
+      "dot", "lua", "vim", "vimdoc", "query", "bibtex", "beancount", "markdown"
     },
     textobjects = {
       select = {
@@ -404,3 +410,4 @@ setup_plugin("cmp", function(cmp)
     },
   })
 end)
+

@@ -1,3 +1,16 @@
+#!/usr/bin/env zsh
+
+function tmux_attach() {
+  # Check 1: Is the 'tmux' command available?
+  # Check 2: Are we NOT already inside a tmux session ($TMUX variable is empty)?
+  # Check 3: Are we NOT in an SSH session (avoids breaking connections)?
+  if command -v tmux &> /dev/null && [ -z "$TMUX" ] && [ -z "$SSH_TTY" ]; then
+    # Create or attach to a session named 'main'
+    # If 'main' exists, it attaches; if not, it creates a new one.
+    tmux attach-session -t main || tmux new-session -s main
+  fi
+}
+
 function evc() { # The /dev/null usage just makes sure we're silently updating our pwd stack
   pushd $HOME/.config/nvim > /dev/null
   nvim
@@ -20,11 +33,105 @@ function etw() {
   nvim ~/.config/task/taskrc
 }
 
-# Adds to path only if it's not already there.
-function add_path() {
-  [[ -d "$1" && ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH"
+function add_to_pathing_envar() {
+  local var_name=$1
+  local dir=$2
+  local position=${3:-prepend}
+
+  # --- Input Validation ---
+  if [[ -z "$var_name" ]] || [[ -z "$dir" ]]; then
+    echo "Usage: add_to_pathing_envar VAR_NAME DIRECTORY [prepend|append]"
+    return 1
+  fi
+
+  # Use Zsh's built-in path normalization (safer than external tools)
+  dir=${dir:A} # Resolve to absolute path
+  dir=${dir%%/} # Remove trailing slash(es)
+
+  # --- Safe Value Retrieval (Zsh-specific but avoids 'eval') ---
+  # ${(P)var_name} safely retrieves the value of the variable named in $var_name
+  local current_value="${(P)var_name}"
+
+  # --- Duplication Check ---
+  # Create a colon-padded version of the current value for checking
+  local padded_value=":$current_value:"
+
+  # Check if the directory is already present
+  if [[ "$padded_value" != *":$dir:"* ]]; then
+    # --- Add Directory ---
+    if [[ "$position" == "append" ]]; then
+      # Append: Only add a colon if the current value is NOT empty
+      export $var_name="${(P)var_name}${current_value:+:}$dir"
+      echo "Appended $dir to $var_name"
+    else
+      # Prepend: Add a colon only if the current value is NOT empty
+      export $var_name="$dir${current_value:+:}${(P)var_name}"
+      echo "Prepended $dir to $var_name"
+    fi
+
+    # NOTE: The subsequent cleanup of leading/trailing colons
+    # is no longer strictly necessary due to the use of ${current_value:+:}
+    # which intelligently adds a colon ONLY if current_value is non-empty.
+  else
+    echo "$dir is already in $var_name"
+  fi
 }
-add_path "$HOME/go/bin"
+
+# Function to remove a directory from an environment variable
+function remove_from_path() {
+  local var_name=$1
+  local dir=$2
+
+  # --- Input Validation ---
+  # Corrected zsh/bash syntax for logical OR in a conditional
+  if [[ -z "$var_name" ]] || [[ -z "$dir" ]]; then
+    echo "Usage: remove_from_path VAR_NAME DIRECTORY"
+    return 1
+  fi
+
+  # Use Zsh's built-in path normalization 
+  dir=${dir:A}   # Resolve to absolute path
+  dir=${dir%%/}  # Remove trailing slash(es)
+
+  # --- Safe Value Retrieval ---
+  # ${(P)var_name} safely retrieves the value of the variable named in $var_name
+  local current_value="${(P)var_name}"
+
+  # --- Duplication Check ---
+  # Create a colon-padded version of the current value for checking
+  local padded_value=":$current_value:"
+
+  # Check if the directory is in the variable
+  if [[ "$padded_value" == *":$dir:"* ]]; then
+    # --- Remove the directory using Zsh's built-in substitution ---
+    # 1. Pad the value to ensure leading/trailing entries are handled consistently
+    local new_value=":$current_value:"
+
+    # 2. Use Zsh's built-in substitution (faster than sed)
+    # Substitute the target pattern (:$dir:) with just a single colon (:) globally
+    new_value="${new_value//:$dir:/:}"
+
+    # 3. Remove leading/trailing colons
+    new_value="${new_value#:}"
+    new_value="${new_value%:}"
+
+    # --- Export the new value using safe parameter expansion ---
+    # This replaces eval "export $var_name=\"$new_value\""
+    export $var_name="$new_value"
+
+    echo "Removed $dir from $var_name"
+  else
+    echo "$dir is not in $var_name"
+  fi
+}
+
+function prepend_to_path() {
+  add_to_pathing_envar "PATH" "$@" "prepend"
+}
+
+prepend_to_path "$HOME/go/bin"
+prepend_to_path "/snap/bin/"
+prepend_to_path /usr/local/cuda-12.6/bin
 
 # And just in case:
 function remove_from_path() {
@@ -34,17 +141,6 @@ function remove_from_path() {
   PATH="${PATH%:}"         # Remove trailing colon, if any
 }
 
-# To install this, see the one-liner script here: https://github.com/Schniz/fnm
-# And then I need some command like: fnm install 22.11.0
-# Weird permissions issues with run/1000 directoy may be resolved by: https://github.com/Schniz/fnm/issues/1119
-add_path "$HOME/.local/share/fnm"
-# Load up fnm (node) as needed
-if [[ ! -v FNM_DIR ]]; then
-  export XDG_RUNTIME_DIR="$HOME/.cache/xdgr"
-  eval "$(fnm env)"
-fi
-
-alias vim='nvim'
 export EDITOR='nvim'
 
 # Set up custom keybindings
@@ -58,37 +154,44 @@ bindkey '^l' forward-word
 # WSL integration:
 export ONEDRIVE_PATH=$(wslpath $(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('OneDrive') | Out-String" | tr -d '\r\n'))
 
+# Left-side prompt showing current time, directory, and elapsed time + exit status
+PROMPT='(%F{4}${elapsed_time}s%f %(?.%F{2}✓.%F{1}X)%f)%F{5}[%D{%H:%M:%S}]%f %F{116}%c%f $(git_prompt_info)
+%F{2}%#%f '
 
-# Left-side prompt showing current time and directory
-PROMPT='%F{5}[%D{%H:%M:%S}]%f %F{116}%c%f $(git_prompt_info)'
+# for some reasonM-BM- 
 
 # Track the start time of each command
+typeset -g elapsed_time
 typeset -g _aaron_start_time
-preexec() {
-  _aaron_start_time=$EPOCHREALTIME
+
+current_time() {
+  date +%s.%6N
 }
 
-# On the RHS report the result of the previous command (timing, return status)
-precmd() {
-  # Have to cache exit status even before resetting RPROMPT
-  local exit_status=$?
-  RPROMPT=""
+preexec() {
+  # For some reason $EPOCHREALTIME isn't available on all systems, so we use
+  # a userland function
+  _aaron_start_time=$(current_time)
+}
 
-  if [[ -n $_aaron_start_time ]]; then
-    _aaron_real_time=$EPOCHREALTIME
-    elapsed_time=$(printf "%.2f" "$(($EPOCHREALTIME - _aaron_start_time))")
-    
-    # Show the time of the previous command
-    RPROMPT="%F{4}${elapsed_time}s%f"
-    # Show the exit status of the previous command
-    if [[ $exit_status -eq 0 ]]; then
-      RPROMPT="$RPROMPT %F{2}✓%f"
-    else
-      RPROMPT="$RPROMPT %F{1}X%f"
-    fi
-    
+# On the LHS report the result of the previous command (timing, return status)
+precmd() {
+  # Have to cache exit status even before resetting PROMPT
+  local exit_status=$?
+
+  if [[ -n "$_aaron_start_time" ]]; then
+    local _aaron_end_time=$(current_time)
+    elapsed_time=$(echo "$_aaron_end_time - $_aaron_start_time" | bc -l)
+
+    # Format elapsed time to two decimal places
+    elapsed_time=$(printf "%.2f" "$elapsed_time")
+
     # Clear start time after calculating elapsed time
     unset _aaron_start_time
+  else
+    elapsed_time="0.00"
   fi
 }
 
+# Ensure there's no RPROMPT since everything is moved to PROMPT
+unset RPROMPT
