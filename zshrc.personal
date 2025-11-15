@@ -1,5 +1,20 @@
 #!/usr/bin/env zsh
 
+# --- FIX: Ensure XDG_RUNTIME_DIR exists for async tools (like fzf-lua) ---
+mkdir -p /tmp/$USER-runtime
+export XDG_RUNTIME_DIR=/tmp/$USER-runtime
+
+# # 1. Define the variable if it's missing (using Zsh's built-in UID)
+# local_runtime_dir="${HOME}/.local/state/runtime"
+# export XDG_RUNTIME_DIR="$local_runtime_dir"
+#
+# # 2. Create the directory if it does not exist
+# if [ ! -d "$XDG_RUNTIME_DIR" ]; then
+#     mkdir -p "$XDG_RUNTIME_DIR"
+#     # Ensure only the owner can read/write/execute (0700)
+#     chmod 0700 "$XDG_RUNTIME_DIR"
+# fi
+
 function tmux_attach() {
   # Check 1: Is the 'tmux' command available?
   # Check 2: Are we NOT already inside a tmux session ($TMUX variable is empty)?
@@ -133,14 +148,6 @@ prepend_to_path "$HOME/go/bin"
 prepend_to_path "/snap/bin/"
 prepend_to_path /usr/local/cuda-12.6/bin
 
-# And just in case:
-function remove_from_path() {
-  PATH=":${PATH}:"
-  PATH="${PATH//:$1:/:}"  # Remove the target directory
-  PATH="${PATH#:}"         # Remove leading colon, if any
-  PATH="${PATH%:}"         # Remove trailing colon, if any
-}
-
 export EDITOR='nvim'
 
 # Set up custom keybindings
@@ -155,8 +162,9 @@ bindkey '^l' forward-word
 export ONEDRIVE_PATH=$(wslpath $(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('OneDrive') | Out-String" | tr -d '\r\n'))
 
 # Left-side prompt showing current time, directory, and elapsed time + exit status
-PROMPT='(%F{4}${elapsed_time}s%f %(?.%F{2}✓.%F{1}X)%f)%F{5}[%D{%H:%M:%S}]%f %F{116}%c%f $(git_prompt_info)
-%F{2}%#%f '
+PROMPT='(%F{blue}${elapsed_time}s%f %(?.%F{green}✓.%F{red}X)%f)%F{cyan}[%D{%H:%M:%S}]%f %F{white}%2~%f $(git_prompt_info)
+%F{yellow}%#%f '
+# print -P "%F{blue}%~%f %F{white}%*%f %F{yellow} [%F{white}%B%~%b%F{yellow}] %{$STATUS_SYMBOL%}"
 
 # for some reasonM-BM- 
 

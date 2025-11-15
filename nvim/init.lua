@@ -6,7 +6,7 @@ vim.pack.add({
   { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
 
   -- === Main Plugins ===
-  { src = 'https://github.com/folke/tokyonight.nvim' },
+  { src = 'https://github.com/neanias/everforest-nvim' },
   { src = 'https://github.com/tpope/vim-fugitive' },
   { src = 'https://github.com/nvim-lualine/lualine.nvim' }, -- (Depends on nvim-web-devicons, which is above)
   { src = 'https://github.com/rmagatti/auto-session' },
@@ -84,8 +84,14 @@ vim.opt.hidden           = true -- TODO revisit this
 vim.opt.errorbells       = false
 vim.opt.swapfile         = false
 vim.opt.backup           = false
--- opt.undodir = vim.fn.expand("~/.vim/undodir") -- TODO: Revisit this
--- opt.undofile = true
+
+local undodir = vim.fn.stdpath("data") .. "/undodir"
+if vim.fn.isdirectory(undodir) == 0 then
+  vim.fn.mkdir(undodir, "p")
+end
+vim.opt.undodir = undodir
+vim.opt.undofile = true
+
 vim.opt.backspace        = "indent,eol,start"
 vim.opt.splitright       = true
 vim.opt.splitbelow       = true
@@ -313,9 +319,11 @@ setup_plugin("auto-session", function(auto_session)
   auto_session.setup()
 end)
 
--- 1. folke/tokyonight.nvim
-setup_plugin("tokyonight", function()
-  vim.cmd("colorscheme tokyonight-night")
+setup_plugin("everforest", function(everforest)
+  everforest.setup({
+    background = "hard"
+  })
+  vim.cmd("colorscheme everforest")
 end)
 
 -- 2. nvim-treesitter/nvim-treesitter
