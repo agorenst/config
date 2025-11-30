@@ -377,4 +377,6 @@ setup_bashlsp() { # used in neovim?
 # Things to think about: sudo snap install bash-language-server --classic; sudo apt install shellcheck                                                                                                                                                                17.45s ✓
 #setup_rust
 
-setup_typst # requires rust, and apt install pkg-config libssl-dev
+# setup_typst # requires rust, and apt install pkg-config libssl-dev
+
+
